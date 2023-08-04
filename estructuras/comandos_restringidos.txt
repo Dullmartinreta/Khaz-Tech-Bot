@@ -1,0 +1,5 @@
+// Comprobamos si el usuario tiene el rol con el ID correspondiente
+        const role = message.guild.roles.cache.get('869574690463686698');
+        if (!role || !message.member.roles.cache.has(role.id)) {
+            return message.reply("No tienes permiso para usar este comando.");
+        }

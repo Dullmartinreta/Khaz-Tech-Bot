@@ -1,0 +1,16 @@
+const Discord = require('discord.js');
+const { MessageActionRow, MessageSelectMenu, MessageEmbed, MessageButton} = require('discord.js')
+
+module.exports = {
+    name: "",
+    alias: [""],
+    execute (client, message, args) {
+    
+        const embed = new Discord.MessageEmbed()
+        .setTitle()
+        .setDescription("")
+
+        message.channel.send({ embeds: [embed] })
+
+    }
+}

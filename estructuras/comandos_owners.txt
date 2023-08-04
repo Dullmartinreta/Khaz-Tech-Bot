@@ -1,0 +1,17 @@
+const Discord = require('discord.js');
+const { MessageActionRow, MessageSelectMenu, MessageEmbed, MessageButton} = require('discord.js')
+const config = require('../config/config.json');
+
+module.exports = {
+  name: "",
+  alias: [""],
+  execute (client, message, args) {
+    if (!config.owners.includes(message.author.id)) {
+        return message.channel.send("**❌ | No estás autorizado para utilizar este comando.**");
+      }
+
+//Resto del codigo
+
+  }
+
+}

@@ -1,0 +1,18 @@
+const config = require('./config.json');
+const { MongoClient } = require('mongodb');
+
+const uri = config.mongoURI;
+
+const client = new MongoClient(uri, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true
+});
+
+client.connect(err => {
+  if (err) {
+    console.error(err);
+    return;
+  }
+  console.log('Conexión a MongoDB establecida');
+  // hacer aquí cualquier operación que requiera la base de datos
+});

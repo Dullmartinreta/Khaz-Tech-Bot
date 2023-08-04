@@ -1,0 +1,108 @@
+const Discord = require('discord.js');
+const { token, prefix } = require('./config.json');
+const { Client, Intents, MessageEmbed, Collection, Guild } = require('discord.js');
+const colors = require('colors');
+const fs = require('fs');
+let { readdirSync } = require('fs');
+const express = require("express")().get("/", (req,res)=>res.send("Bot en Linea!")).listen(3000)
+
+const client = new Client({
+  intents: [
+      Intents.FLAGS.GUILDS,
+      Intents.FLAGS.GUILD_MESSAGES,
+      Intents.FLAGS.DIRECT_MESSAGES,
+      Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
+      Intents.FLAGS.DIRECT_MESSAGE_REACTIONS,
+      Intents.FLAGS.GUILD_VOICE_STATES
+  ]
+});
+
+client.commands = new Discord.Collection();
+
+// Carga los comandos con prefijo
+const commandFiles = fs.readdirSync('./comandos').filter(file => file.endsWith('.js'));
+
+for (const file of commandFiles) {
+  const command = require(`./comandos/${file}`);
+  client.commands.set(command.name, command);
+  console.log(`🚨 [B.E] SYSTEM CARGÓ EL LEGACY PREFIX COMMAND ${file} CORRECTAMENTE.🚨`.green)
+}
+
+
+
+// Carga los comandos de barra
+const { REST } = require('@discordjs/rest');
+const { Routes } = require('discord-api-types/v9');
+const commands = [];
+const slashCommandFiles = fs.readdirSync('./slashcmd').filter(file => file.endsWith('.js'));
+
+for (const file of slashCommandFiles) {
+  const command = require(`./slashcmd/${file}`);
+  commands.push(command.data.toJSON());
+  console.log(`🚨 [B.E] SYSTEM CARGÓ EL SLASHCOMMAND ${file} CORRECTAMENTE. 🚨`.green)
+}
+
+const rest = new REST({ version: '9' }).setToken(token);
+
+(async () => {
+  try {
+    console.log('[B.E] SYSTEM: INICIANDO REGISTRO DE SLASH COMMANDS.'.yellow);
+
+    await rest.put(
+      Routes.applicationCommands(client.application?.id ?? client.user.id),
+      { body: commands },
+    );
+
+    console.log('[B.E] SYSTEM: SLASH COMMANDS REGISTRADOS CORRECTAMENTE.'.green);
+  } catch (error) {
+    console.error(error);
+  }
+})();
+
+client.on('ready', () => {
+  console.log(`
+  ╔═════════════════════════════════════════════════════════╗
+  ║                                                         ║
+  ║         SESIÓN INICIADA COMO ${client.user.tag}          ║
+  ║                BIENVENIDO, MARTINLUKSIC.                ║
+  ║                                                         ║
+  ╚═════════════════════════════════════════════════════════╝`.yellow);
+});
+
+client.on('interactionCreate', async interaction => {
+  if (!interaction.isCommand()) return;
+
+  const command = client.commands.get(interaction.commandName);
+  if (!command) return;
+
+  try {
+    await command.execute(interaction);
+  } catch (error) {
+    console.error(error);
+    await interaction.reply({
+      content: 'Ha ocurrido un error al intentar ejecutar este comando.',
+      ephemeral: true,
+    });
+  }
+});
+
+client.on('messageCreate', message => {
+  if (!message.content.startsWith(prefix) || message.author.bot) return;
+
+  const args = message.content.slice(prefix.length).trim().split(/ +/);
+  const commandName = args.shift().toLowerCase();
+
+  const command = client.commands.get(commandName)
+    || client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
+
+  if (!command) return;
+
+  try {
+    command.execute(message, args);
+  } catch (error) {
+    console.error(error);
+    message.reply('[B.E] SYSTEM DETECTÓ UN ERROR AL EJECUTAR EL COMANDO'.bgRed);
+  }
+});
+
+client.login(token);

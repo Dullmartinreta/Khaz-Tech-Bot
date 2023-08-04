@@ -1,0 +1,10 @@
+"": {
+      "Cuentacorriente": {
+        "Titular": "",
+        "Numerodecuenta": "°",
+        "Link": "",
+        "Saldoactual": "R$ ``",
+        "Cantidadprestamos": "",
+        "Cuentaderespaldo": ""
+      }
+    },
